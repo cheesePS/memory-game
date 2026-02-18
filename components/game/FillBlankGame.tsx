@@ -224,7 +224,7 @@ export default function FillBlankGame({ cards, difficulty, onComplete }: FillBla
           {card.reference}
         </span>
         {difficulty === 'beginner' && (
-          <p className="text-xs text-gray-400 mt-2">Recite the verse to guess, or click on a blank to reveal the answer</p>
+          <p className="text-xs text-gray-400 mt-2">2. Click on the blank; the correct word will appear. Continue reciting the Scripture and repeat steps 1–2 until you have completed quoting it.</p>
         )}
       </div>
 

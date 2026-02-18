@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { ScriptureCard, Difficulty } from '@/lib/types';
-import { generateMatchingPairs, shuffleArray, getTimerForDifficulty } from '@/lib/gameLogic';
+import { generateMatchingPairs, shuffleArray, getMatchingTimerForDifficulty } from '@/lib/gameLogic';
 import Timer from '@/components/ui/Timer';
 import { Zap, Lightbulb, Volume2 } from 'lucide-react';
 
@@ -21,7 +21,7 @@ interface MatchItem {
 type Selection = { side: 'left' | 'right'; item: MatchItem } | null;
 
 export default function MatchingGame({ cards, difficulty, onComplete }: MatchingGameProps) {
-  const totalTime = getTimerForDifficulty(difficulty);
+  const totalTime = getMatchingTimerForDifficulty(difficulty);
   const [timeRemaining, setTimeRemaining] = useState(totalTime);
   const [isPaused, setIsPaused] = useState(false);
   const [references, setReferences] = useState<MatchItem[]>([]);

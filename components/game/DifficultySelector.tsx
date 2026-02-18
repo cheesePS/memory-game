@@ -7,6 +7,7 @@ import { Zap, Target, Flame } from 'lucide-react';
 interface DifficultySelectorProps {
   value: Difficulty;
   onChange: (d: Difficulty) => void;
+  descriptions?: Partial<Record<Difficulty, string>>;
 }
 
 const options: { value: Difficulty; label: string; description: string; icon: React.ReactNode; color: string }[] = [
@@ -33,7 +34,7 @@ const options: { value: Difficulty; label: string; description: string; icon: Re
   },
 ];
 
-export default function DifficultySelector({ value, onChange }: DifficultySelectorProps) {
+export default function DifficultySelector({ value, onChange, descriptions }: DifficultySelectorProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
       {options.map(opt => (
@@ -49,7 +50,7 @@ export default function DifficultySelector({ value, onChange }: DifficultySelect
         >
           {opt.icon}
           <span className="font-bold">{opt.label}</span>
-          <span className="text-xs text-center opacity-75">{opt.description}</span>
+          <span className="text-xs text-center opacity-75">{descriptions?.[opt.value] ?? opt.description}</span>
         </button>
       ))}
     </div>

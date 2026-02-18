@@ -4,7 +4,7 @@ import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useGame } from '@/contexts/GameContext';
 import { getDeckById } from '@/lib/data';
-import { calculateScore, getTimerForDifficulty } from '@/lib/gameLogic';
+import { calculateScore, getMatchingTimerForDifficulty } from '@/lib/gameLogic';
 import MatchingGame from '@/components/game/MatchingGame';
 import GameComplete from '@/components/game/GameComplete';
 import DifficultySelector from '@/components/game/DifficultySelector';
@@ -20,7 +20,7 @@ export default function MatchingPage() {
   } | null>(null);
 
   const deck = getDeckById(settings.selectedDeckId);
-  const totalTime = getTimerForDifficulty(settings.difficulty);
+  const totalTime = getMatchingTimerForDifficulty(settings.difficulty);
 
   const handleComplete = useCallback((correct: number, total: number, timeRemaining: number, maxCombo: number) => {
     const score = calculateScore(correct, total, timeRemaining, totalTime, maxCombo, 0);
@@ -88,7 +88,15 @@ export default function MatchingPage() {
 
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-2">Difficulty</label>
-          <DifficultySelector value={settings.difficulty} onChange={setDifficulty} />
+          <DifficultySelector
+            value={settings.difficulty}
+            onChange={setDifficulty}
+            descriptions={{
+              beginner: 'Use the hint button to match the verse to its scripture reference.',
+              intermediate: 'Use the hint button to match the verse to its scripture reference within the time frame.',
+              advanced: 'Match the verse to its scripture reference within the time frame. No hints available!',
+            }}
+          />
         </div>
 
         <Button size="lg" className="w-full" onClick={() => setStarted(true)}>

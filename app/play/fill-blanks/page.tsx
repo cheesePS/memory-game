@@ -89,16 +89,15 @@ export default function FillBlanksPage() {
 
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-2">Difficulty</label>
-          <DifficultySelector value={settings.difficulty} onChange={setDifficulty} />
-        </div>
-
-        <div className="bg-amber-50 rounded-xl p-4 border border-amber-100">
-          <p className="text-sm text-amber-700">
-            <strong>How it works:</strong> Words will be hidden from the scripture text.
-            {settings.difficulty === 'beginner'
-              ? ' Tap any blank to reveal the answer, or type it yourself!'
-              : ` Type the correct word to fill each blank.${settings.difficulty === 'advanced' ? ' No hints available in Advanced mode!' : ' You get 3 hints.'}`}
-          </p>
+          <DifficultySelector
+            value={settings.difficulty}
+            onChange={setDifficulty}
+            descriptions={{
+              beginner: 'Click on the blank to reveal the answer, or recite the verse to guess.',
+              intermediate: 'Type the correct word to fill each blank. Use Reveal Answer if you get stuck.',
+              advanced: 'Type the correct word to fill each blank. No hints or skips available!',
+            }}
+          />
         </div>
 
         <Button size="lg" className="w-full" onClick={() => setStarted(true)}>

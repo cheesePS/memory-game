@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { ScriptureCard } from '@/lib/types';
 import { useGame } from '@/contexts/GameContext';
 import Button from '@/components/ui/Button';
-import { RotateCcw, Eye, Star, ChevronLeft, ChevronRight, Lightbulb, BookOpen, RefreshCw, Pause, Play, Volume2 } from 'lucide-react';
+import { RotateCcw, Eye, Star, ChevronLeft, ChevronRight, Lightbulb, BookOpen, RefreshCw, Pause, Play, Volume2, SkipForward, Check } from 'lucide-react';
 
 export type FlashcardMode = 'manual' | 'auto-verses' | 'auto-scripture';
 
@@ -154,6 +154,13 @@ export default function FlashcardGame({ cards, deckId, mode, voiceEnabled = fals
           </div>
         </div>
 
+        {/* Instruction */}
+        <p className="text-xs text-gray-400 text-center -mt-3">
+          {mode === 'auto-verses'
+            ? 'You will have 30 seconds to recite the scripture before it automatically moves to the next verse.'
+            : 'You will have 30 seconds to recite the verse before it automatically moves to the next scripture.'}
+        </p>
+
         {/* Card - Single side only */}
         <div className={`relative w-full aspect-[3/2] ${
           autoFlipAnim === 'out' ? 'animate-autoFlipOut' :
@@ -177,6 +184,19 @@ export default function FlashcardGame({ cards, deckId, mode, voiceEnabled = fals
         <div className="flex items-center gap-3">
           <Button variant="secondary" size="sm" onClick={() => setPaused(p => !p)}>
             {paused ? <><Play size={16} /> Resume</> : <><Pause size={16} /> Pause</>}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+            if (flipTimerRef.current) clearTimeout(flipTimerRef.current);
+            if (typeof window !== 'undefined' && window.speechSynthesis) window.speechSynthesis.cancel();
+            setAutoFlipAnim('out');
+            setTimeout(() => {
+              setCurrentIndex(i => (i + 1) % cards.length);
+              setAutoFlipAnim('in');
+              setTimeout(() => setAutoFlipAnim(''), 300);
+            }, 300);
+          }}>
+            <SkipForward size={16} /> Skip
           </Button>
           <Button variant="ghost" size="sm" onClick={onPlayAgain}>
             <RefreshCw size={16} /> Play Again
@@ -258,9 +278,19 @@ export default function FlashcardGame({ cards, deckId, mode, voiceEnabled = fals
         <Button variant="ghost" size="sm" onClick={onPlayAgain}>
           <RefreshCw size={16} /> Play Again
         </Button>
-        <Button variant="ghost" size="sm" onClick={() => goTo('next')} disabled={currentIndex === cards.length - 1}>
-          Next <ChevronRight size={18} />
-        </Button>
+        {currentIndex === cards.length - 1 ? (
+          <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-white" onClick={() => {
+            const correct = Object.values(statuses).filter(s => s === 'mastered').length;
+            setCompleted(true);
+            onComplete(correct, cards.length);
+          }}>
+            <Check size={16} /> Finish
+          </Button>
+        ) : (
+          <Button variant="ghost" size="sm" onClick={() => goTo('next')}>
+            Next <ChevronRight size={18} />
+          </Button>
+        )}
       </div>
 
       {/* Status Legend */}

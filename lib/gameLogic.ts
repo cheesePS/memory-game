@@ -6,6 +6,12 @@ export const TIMER_CONFIG: TimerConfig = {
   advanced: 45,
 };
 
+export const MATCHING_TIMER_CONFIG: TimerConfig = {
+  beginner: 600,
+  intermediate: 420,
+  advanced: 300,
+};
+
 export const XP_PER_CORRECT = 10;
 export const XP_PER_COMBO = 5;
 export const XP_PER_GAME_COMPLETE = 50;
@@ -121,7 +127,7 @@ export function generateMatchingPairs(cards: ScriptureCard[]): {
 
   const scriptures = shuffleArray(cards.map(c => ({
     id: `scr-${c.id}`,
-    text: c.text.length > 80 ? c.text.slice(0, 80) + '...' : c.text,
+    text: c.text,
     cardId: c.id,
   })));
 
@@ -143,6 +149,10 @@ export function getToday(): string {
 
 export function getTimerForDifficulty(difficulty: Difficulty): number {
   return TIMER_CONFIG[difficulty];
+}
+
+export function getMatchingTimerForDifficulty(difficulty: Difficulty): number {
+  return MATCHING_TIMER_CONFIG[difficulty];
 }
 
 export function getMaxHints(difficulty: Difficulty): number {

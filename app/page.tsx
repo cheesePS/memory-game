@@ -7,7 +7,7 @@ import { decks } from '@/lib/data';
 import { xpForCurrentLevel } from '@/lib/gameLogic';
 import ProgressBar from '@/components/ui/ProgressBar';
 import {
-  BookOpen, Layers, PenTool, Trophy, Flame, Star, ChevronRight, Lock, Zap,
+  BookOpen, Layers, PenTool, Trophy, Flame, Star, ChevronRight, Lock, Zap, FileText,
 } from 'lucide-react';
 
 const gameModes = [
@@ -104,6 +104,23 @@ export default function HomePage() {
             </Link>
           ))}
         </div>
+      </section>
+
+      {/* Study Sheet */}
+      <section>
+        <Link
+          href="/study"
+          className="flex items-center gap-4 rounded-2xl border-2 border-indigo-100 bg-indigo-50 p-5 hover:border-indigo-300 hover:shadow-md transition-all duration-200"
+        >
+          <div className="p-3 bg-indigo-100 rounded-xl">
+            <FileText size={24} className="text-indigo-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-bold text-gray-900">Study sheet of the scripture decks</h3>
+            <p className="text-sm text-gray-500">View all scripture decks with their references. Study or download for offline use.</p>
+          </div>
+          <ChevronRight size={20} className="text-indigo-400" />
+        </Link>
       </section>
 
       {/* Decks */}

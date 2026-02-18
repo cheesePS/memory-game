@@ -1,24 +1,32 @@
 import { ShareData } from './types';
 
+const APP_PROMO = `\n\nCheck out this Scripture memory app to strengthen your knowledge of the Word: https://memory.raindropoju.education/\n\nThis app also includes exciting challenge features to test and grow your memory!`;
+
 function buildShareText(data: ShareData): string {
-  const appTag = '- Scripture Memory Game';
+  let text: string;
   switch (data.type) {
     case 'deck_complete':
-      return `I just completed the "${data.title}" deck! 📖\n${data.verse ? `"${data.verse}"` : ''}\nScore: ${data.score} ${appTag}`;
+      text = `I just completed the "${data.title}" deck! 📖\n${data.verse ? `"${data.verse}"` : ''}\nScore: ${data.score}`;
+      break;
     case 'high_score':
-      return `New high score: ${data.score}! 🏆\n${data.title} ${appTag}`;
+      text = `New high score: ${data.score}! 🏆\n${data.title}`;
+      break;
     case 'streak':
-      return `${data.streak}-day memorization streak! 🔥\n${data.title} ${appTag}`;
+      text = `${data.streak}-day memorization streak! 🔥\n${data.title}`;
+      break;
     case 'badge':
-      return `I just earned the "${data.badgeName}" badge! 🎖️\n${data.title} ${appTag}`;
+      text = `I just earned the "${data.badgeName}" badge! 🎖️\n${data.title}`;
+      break;
     default:
-      return `${data.title} ${appTag}`;
+      text = data.title;
   }
+  return text + APP_PROMO;
 }
 
 export function shareToFacebook(data: ShareData): void {
   const text = encodeURIComponent(buildShareText(data));
-  window.open(`https://www.facebook.com/sharer/sharer.php?quote=${text}`, '_blank', 'width=600,height=400');
+  const url = encodeURIComponent('https://memory.raindropoju.education/');
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank', 'width=600,height=400');
 }
 
 export function shareToTwitter(data: ShareData): void {
