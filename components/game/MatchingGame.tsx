@@ -39,12 +39,32 @@ export default function MatchingGame({ cards, difficulty, onComplete }: Matching
   const [disappearingIds, setDisappearingIds] = useState<Set<string>>(new Set());
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const [chunkIndex, setChunkIndex] = useState(0);
+  const [chunkScriptures, setChunkScriptures] = useState<MatchItem[]>([]);
+  const chunkSize = 2;
+  const useChunking = difficulty !== 'advanced';
 
   useEffect(() => {
     const { references: refs, scriptures: scrs } = generateMatchingPairs(cards);
     setReferences(refs);
     setScriptures(scrs);
   }, [cards]);
+
+  // Shuffle chunk scriptures whenever chunkIndex or scriptures change
+  useEffect(() => {
+    if (!useChunking || references.length === 0) return;
+    const chunkStart = chunkIndex * chunkSize;
+    const currentRefs = references.slice(chunkStart, chunkStart + chunkSize);
+    const visibleCardIds = new Set(currentRefs.map(r => r.cardId));
+    const filtered = scriptures.filter(s => visibleCardIds.has(s.cardId));
+    setChunkScriptures(shuffleArray(filtered));
+  }, [chunkIndex, references, scriptures, useChunking]);
+
+  // Get the current visible references & scriptures based on chunking
+  const visibleReferences = useChunking
+    ? references.slice(chunkIndex * chunkSize, (chunkIndex + 1) * chunkSize)
+    : references;
+  const visibleScriptures = useChunking ? chunkScriptures : scriptures;
 
   const checkComplete = useCallback((newMatchedIds: Set<string>) => {
     if (newMatchedIds.size === cards.length) {
@@ -102,6 +122,15 @@ export default function MatchingGame({ cards, difficulty, onComplete }: Matching
             next.add(item.cardId);
             return next;
           });
+          // Advance chunk if all current chunk pairs are matched
+          if (useChunking) {
+            const chunkStart = chunkIndex * chunkSize;
+            const chunkRefs = references.slice(chunkStart, chunkStart + chunkSize);
+            const allChunkMatched = chunkRefs.every(r => newMatched.has(r.cardId));
+            if (allChunkMatched && newMatched.size < cards.length) {
+              setChunkIndex(ci => ci + 1);
+            }
+          }
         }, 500);
       }, 600);
       setSelected(null);
@@ -116,7 +145,7 @@ export default function MatchingGame({ cards, difficulty, onComplete }: Matching
         setSelected(null);
       }, 600);
     }
-  }, [selected, matchedIds, combo, wrongPair, checkComplete]);
+  }, [selected, matchedIds, combo, wrongPair, checkComplete, useChunking, chunkIndex, references, cards.length]);
 
   // Look up the hint text for a card
   const getCardHint = useCallback((cardId: string) => {
@@ -174,6 +203,9 @@ export default function MatchingGame({ cards, difficulty, onComplete }: Matching
         </div>
         <div className="flex items-center gap-4 text-sm">
           <span className="text-gray-500">Matched: <b className="text-indigo-600">{matchedIds.size}/{cards.length}</b></span>
+          {useChunking && (
+            <span className="text-gray-500">Round: <b className="text-indigo-600">{Math.min(chunkIndex + 1, Math.ceil(references.length / chunkSize))}/{Math.ceil(references.length / chunkSize)}</b></span>
+          )}
           {combo > 1 && (
             <span className="flex items-center gap-1 text-amber-600 font-bold animate-bounce">
               <Zap size={16} /> {combo}x Combo!
@@ -204,12 +236,12 @@ export default function MatchingGame({ cards, difficulty, onComplete }: Matching
         {/* References Column */}
         <div className="flex flex-col gap-3">
           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider text-center">References</h3>
-          {references.map(ref => {
+          {visibleReferences.map(ref => {
             if (isItemHidden(ref.cardId)) return null;
             return (
               <div
                 key={ref.id}
-                className={`relative p-4 rounded-xl text-center font-semibold transition-all duration-200 border-2 overflow-hidden ${
+                className={`relative p-4 rounded-xl text-center font-semibold transition-all duration-200 border-2 overflow-hidden min-h-30 flex items-center justify-center ${
                   isItemDisappearing(ref.cardId)
                     ? 'animate-matchDisappear'
                     : isItemMatched(ref.cardId)
@@ -255,12 +287,12 @@ export default function MatchingGame({ cards, difficulty, onComplete }: Matching
         {/* Scriptures Column */}
         <div className="flex flex-col gap-3">
           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider text-center">Scriptures</h3>
-          {scriptures.map(scr => {
+          {visibleScriptures.map(scr => {
             if (isItemHidden(scr.cardId)) return null;
             return (
               <div
                 key={scr.id}
-                className={`relative p-4 rounded-xl text-left text-sm leading-relaxed transition-all duration-200 border-2 overflow-hidden ${
+                className={`relative p-4 rounded-xl text-left text-sm leading-relaxed transition-all duration-200 border-2 overflow-hidden min-h-30 flex items-center ${
                   isItemDisappearing(scr.cardId)
                     ? 'animate-matchDisappear'
                     : isItemMatched(scr.cardId)
