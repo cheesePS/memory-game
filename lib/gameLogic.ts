@@ -7,9 +7,9 @@ export const TIMER_CONFIG: TimerConfig = {
 };
 
 export const MATCHING_TIMER_CONFIG: TimerConfig = {
-  beginner: 600,
-  intermediate: 420,
-  advanced: 300,
+  beginner: 1200,
+  intermediate: 900,
+  advanced: 900,
 };
 
 export const XP_PER_CORRECT = 10;
