@@ -39,7 +39,6 @@ export default function FillBlankGame({ cards, difficulty, onComplete }: FillBla
   const [maxCombo, setMaxCombo] = useState(0);
   const [cardCorrects, setCardCorrects] = useState(0);
   const [completed, setCompleted] = useState(false);
-  const [mcChoices, setMcChoices] = useState<string[]>([]);
   const [activeBlankIdx, setActiveBlankIdx] = useState<number | null>(null);
 
   const card = cards[currentIndex];
@@ -55,7 +54,6 @@ export default function FillBlankGame({ cards, difficulty, onComplete }: FillBla
       setRevealedHints(new Set());
       setCardCorrects(0);
       setActiveBlankIdx(null);
-      setMcChoices([]);
     }
   }, [card, difficulty]);
 
@@ -139,39 +137,40 @@ export default function FillBlankGame({ cards, difficulty, onComplete }: FillBla
     setRevealedHints(prev => new Set(prev).add(currentBlankIdx));
   }, [hintsUsed, maxHints, currentBlankIdx]);
 
-  // Generate 3 multiple-choice options for intermediate
-  const generateChoices = useCallback((blankIdx: number) => {
-    const correct = blankData.blanks[blankIdx];
-    if (!correct) return [];
-
-    // Collect distractor candidates from other blanks + words in the verse
+  // Pre-compute multiple-choice options for all blanks (intermediate)
+  const allChoicesMap = useMemo(() => {
+    if (difficulty !== 'intermediate' || blankData.blanks.length === 0 || !card) return {};
     const skipWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'is', 'it', 'be', 'as', 'do', 'no', 'not', 'so', 'up', 'if', 'my', 'ye', 'he', 'me']);
-    const cleanCorrect = correct.toLowerCase().replace(/[^a-z]/g, '');
-    const candidates: string[] = [];
+    const map: Record<number, string[]> = {};
 
-    // Other blanks first (good distractors)
-    blankData.blanks.forEach((b, i) => {
-      if (i !== blankIdx) {
-        const clean = b.toLowerCase().replace(/[^a-z]/g, '');
-        if (clean !== cleanCorrect && !candidates.some(c => c.toLowerCase().replace(/[^a-z]/g, '') === clean)) {
-          candidates.push(b);
+    blankData.blanks.forEach((correctWord, blankIdx) => {
+      const cleanCorrect = correctWord.toLowerCase().replace(/[^a-z]/g, '');
+      const candidates: string[] = [];
+
+      // Other blanks first (good distractors)
+      blankData.blanks.forEach((b, i) => {
+        if (i !== blankIdx) {
+          const clean = b.toLowerCase().replace(/[^a-z]/g, '');
+          if (clean !== cleanCorrect && !candidates.some(c => c.toLowerCase().replace(/[^a-z]/g, '') === clean)) {
+            candidates.push(b);
+          }
         }
-      }
+      });
+
+      // Words from the verse text as fallback
+      card.text.split(' ').forEach(w => {
+        const clean = w.replace(/[^a-zA-Z]/g, '').toLowerCase();
+        if (clean.length > 2 && !skipWords.has(clean) && clean !== cleanCorrect && !candidates.some(c => c.toLowerCase().replace(/[^a-z]/g, '') === clean)) {
+          candidates.push(w);
+        }
+      });
+
+      const distractors = shuffleArray(candidates).slice(0, 2);
+      map[blankIdx] = shuffleArray([correctWord, ...distractors]);
     });
 
-    // Words from the verse text as fallback
-    const verseWords = card.text.split(' ');
-    verseWords.forEach(w => {
-      const clean = w.replace(/[^a-zA-Z]/g, '').toLowerCase();
-      if (clean.length > 2 && !skipWords.has(clean) && clean !== cleanCorrect && !candidates.some(c => c.toLowerCase().replace(/[^a-z]/g, '') === clean)) {
-        candidates.push(w);
-      }
-    });
-
-    const shuffled = shuffleArray(candidates);
-    const distractors = shuffled.slice(0, 2);
-    return shuffleArray([correct, ...distractors]);
-  }, [blankData, card]);
+    return map;
+  }, [blankData, card, difficulty]);
 
   const revealBlank = useCallback((blankIdx: number) => {
     if (difficulty !== 'beginner') return;
@@ -215,8 +214,7 @@ export default function FillBlankGame({ cards, difficulty, onComplete }: FillBla
     if (showResult) return;
     setCurrentBlankIdx(blankIdx);
     setActiveBlankIdx(blankIdx);
-    setMcChoices(generateChoices(blankIdx));
-  }, [difficulty, userAnswers, showResult, generateChoices]);
+  }, [difficulty, userAnswers, showResult]);
 
   // Intermediate: pick a choice
   const pickChoice = useCallback((choice: string) => {
@@ -245,7 +243,6 @@ export default function FillBlankGame({ cards, difficulty, onComplete }: FillBla
       setTimeout(() => {
         setShowResult(null);
         setActiveBlankIdx(null);
-        setMcChoices([]);
 
         const allFilled = newAnswers.every(a => a !== '');
         if (allFilled) {
@@ -378,9 +375,9 @@ export default function FillBlankGame({ cards, difficulty, onComplete }: FillBla
       </div>
 
       {/* Multiple Choice — intermediate only */}
-      {difficulty === 'intermediate' && activeBlankIdx !== null && mcChoices.length > 0 && (
+      {difficulty === 'intermediate' && activeBlankIdx !== null && allChoicesMap[activeBlankIdx]?.length > 0 && (
         <div className="flex flex-wrap items-center justify-center gap-3">
-          {mcChoices.map((choice, i) => (
+          {allChoicesMap[activeBlankIdx].map((choice: string, i: number) => (
             <button
               key={i}
               onClick={() => pickChoice(choice)}
