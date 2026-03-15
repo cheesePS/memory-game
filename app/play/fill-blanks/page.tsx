@@ -93,9 +93,9 @@ export default function FillBlanksPage() {
             value={settings.difficulty}
             onChange={setDifficulty}
             descriptions={{
-              beginner: 'Click on the blank to reveal the answer, or recite the verse to guess.',
-              intermediate: 'Type the correct word to fill each blank. Use Reveal Answer if you get stuck.',
-              advanced: 'Type the correct word to fill each blank. No hints or skips available!',
+              beginner: 'Click on the blank and the correct word will appear.',
+              intermediate: 'Click on a blank, then choose the correct word from 3 options.',
+              advanced: 'Click on a blank, then type the correct word. No hints or skips!',
             }}
           />
         </div>
