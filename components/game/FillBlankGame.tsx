@@ -387,9 +387,7 @@ export default function FillBlankGame({ cards, difficulty, onComplete }: FillBla
               disabled={!!showResult}
               className={`px-5 py-2.5 rounded-xl border-2 font-semibold text-base transition-all cursor-pointer ${
                 showResult
-                  ? choice.toLowerCase().replace(/[^a-z]/g, '') === blankData.blanks[activeBlankIdx]?.toLowerCase().replace(/[^a-z]/g, '')
-                    ? 'bg-emerald-100 border-emerald-400 text-emerald-700'
-                    : 'bg-gray-50 border-gray-200 text-gray-400'
+                  ? 'bg-gray-50 border-gray-200 text-gray-400'
                   : 'bg-white border-gray-200 text-gray-800 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-md'
               }`}
             >
