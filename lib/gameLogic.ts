@@ -1,9 +1,9 @@
 import { Difficulty, TimerConfig, ScriptureCard } from './types';
 
 export const TIMER_CONFIG: TimerConfig = {
-  beginner: 120,
+  beginner: 600,
   intermediate: 240,
-  advanced: 45,
+  advanced: 1200,
 };
 
 export const MATCHING_TIMER_CONFIG: TimerConfig = {
